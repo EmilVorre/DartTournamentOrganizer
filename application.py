@@ -289,7 +289,7 @@ class MatchmakingApp(QWidget):
 
         available_players = [player for player in self.players if player not in self.eliminated_players]
         # Sort players by unused count (ascending) and then shuffle to randomize within the same unused count
-        available_players.sort(key=lambda player: (player.unused_count, random.random()))
+        available_players.sort(key=lambda player: (player.internal_times_sat_out, random.random()))
         self.matches = []
         self.unused_players = []
 
@@ -303,7 +303,6 @@ class MatchmakingApp(QWidget):
 
         # Increment unused count for players who are unused
         for player in self.unused_players:
-            player.unused_count += 1
             player.sit_out()
 
         # Update the matches table
