@@ -1,3 +1,10 @@
+print("""
+    Dart Tournament Organizer Copyright (C) 2024  EmilVorre
+    This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+    This is free software, and you are welcome to redistribute it
+    under certain conditions; type `show c' for details.
+""")
+
 from PyQt6.QtWidgets import (
     QApplication, QTableWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QWidget, QDialog, QGridLayout, QLineEdit, QSpinBox, QFormLayout, QListWidget, QListWidgetItem, QMessageBox
