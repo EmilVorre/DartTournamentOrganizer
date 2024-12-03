@@ -2,9 +2,11 @@ from PyQt6.QtWidgets import (
     QApplication, QTableWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout,
     QPushButton, QDialogButtonBox, QLabel, QWidget, QDialog, QGridLayout, QLineEdit, QSpinBox, QFormLayout, QListWidget, QListWidgetItem, QMessageBox, QCheckBox
 )
+from PyQt6.QtGui import QPainter, QPixmap
 from PyQt6.QtCore import Qt
 import random
 from player import Player  # Import the Player class
+from stats import Stats  # Import the Match class
 
 class PlayerItemWidget(QWidget):
     def __init__(self, player_name, remove_callback):
@@ -26,9 +28,14 @@ class PlayerItemWidget(QWidget):
     def remove_player(self):
         self.remove_callback(self.player_name)
 
+    # sort players alfabetically
+    def __lt__(self, other):
+        return self.player_name < other.player_name
+
 class StartPage(QWidget):
-    def __init__(self):
+    def __init__(self, player_names=None):
         super().__init__()
+        self.player_names = player_names if player_names else []
         self.init_ui()
 
     def init_ui(self):
@@ -67,8 +74,13 @@ class StartPage(QWidget):
 
         self.setLayout(layout)
 
-    def add_player(self):
-        player_name = self.player_name_input.text().strip()
+        # Pre-enter player names if provided
+        for name in self.player_names:
+            self.add_player(name)
+
+    def add_player(self, player_name=None):
+        if player_name is None:
+            player_name = self.player_name_input.text().strip()
         if player_name:
             for i in range(self.player_list.count()):
                 item = self.player_list.item(i)
@@ -146,6 +158,20 @@ class Application(QWidget):
         else:
             self.show_matchmaking_ui()
 
+    def paintEvent(self, event):
+        super().paintEvent(event)
+
+        # Create a painter to draw the dartboard
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # Load and draw the dartboard image
+        dartboard = QPixmap("dartboard.png")  # Path to your dartboard image
+        if not dartboard.isNull():
+            painter.setOpacity(0.3)  # Make it semi-transparent
+            target_rect = self.rect()  # Fill the entire widget
+            painter.drawPixmap(target_rect, dartboard)
+
     def show_matchmaking_ui(self):
         # Player Tables Layout
         player_tables_layout = QVBoxLayout()
@@ -187,10 +213,6 @@ class Application(QWidget):
 
         self.main_layout.addLayout(matches_unused_layout)
 
-        # Status Label
-        self.status_label = QLabel("Status: Waiting for matches to be generated.")
-        self.main_layout.addWidget(self.status_label)
-
         # Buttons Layout
         buttons_layout = QVBoxLayout()
 
@@ -204,6 +226,16 @@ class Application(QWidget):
         self.submit_results_button.setEnabled(False)
         self.submit_results_button.clicked.connect(self.handle_match_results)
         buttons_layout.addWidget(self.submit_results_button)
+
+        # Restart Tournament Button
+        reset_tournament_button = QPushButton("Restart Tournament")
+        reset_tournament_button.clicked.connect(self.restart_tournament)
+        buttons_layout.addWidget(reset_tournament_button)
+
+        # End Tournament Button
+        end_tournament_button = QPushButton("End Tournament")
+        end_tournament_button.clicked.connect(self.reset_tournament)
+        buttons_layout.addWidget(end_tournament_button)
 
         self.main_layout.addLayout(buttons_layout)
 
@@ -244,9 +276,9 @@ class Application(QWidget):
         self.player_table.setRowCount(len(self.players))
         for row, player in enumerate(self.players):
             self.player_table.setItem(row, 0, QTableWidgetItem(player.name))
-            self.player_table.setItem(row, 1, QTableWidgetItem(str(player.losses)))
-            self.player_table.setItem(row, 2, QTableWidgetItem(str(player.wins)))
-            self.player_table.setItem(row, 3, QTableWidgetItem(str(player.times_sat_out)))
+            self.player_table.setItem(row, 1, QTableWidgetItem(str(player.stats.losses)))
+            self.player_table.setItem(row, 2, QTableWidgetItem(str(player.stats.wins)))
+            self.player_table.setItem(row, 3, QTableWidgetItem(str(player.stats.times_sat_out)))
 
     def update_eliminated_table(self):
         self.eliminated_table.setRowCount(len(self.eliminated_players))
@@ -290,8 +322,8 @@ class Application(QWidget):
         for row, player in enumerate(self.unused_players):
             self.unused_table.setItem(row, 0, QTableWidgetItem(player.name))
 
+        self.generate_matches_button.setEnabled(False)
         self.submit_results_button.setEnabled(True)
-        self.status_label.setText("Status: Matches generated. Enter results.")
 
     def handle_cell_click(self, row, column):
         if column == 0:
@@ -317,7 +349,7 @@ class Application(QWidget):
                 break
 
         if not all_results_entered:
-            self.status_label.setText("Status: Enter all results before submitting!")
+            QMessageBox.warning(self, "Incomplete Results", "Please select a winner for all matches.")
             return
 
         # Track the players eliminated in this round
@@ -347,7 +379,7 @@ class Application(QWidget):
         self.match_table.setRowCount(0)
         self.unused_table.setRowCount(0)
         self.submit_results_button.setEnabled(False)
-        self.status_label.setText("Status: Results submitted successfully!")
+        self.generate_matches_button.setEnabled(True)
 
         # Check if the tournament should end
         self.check_tournament_end()
@@ -382,16 +414,14 @@ class Application(QWidget):
         selected_players = [player for checkbox, player in self.checkboxes if checkbox.isChecked()]
         for player in selected_players:
             self.players.append(player)
-            player.losses = 0
-            player.wins = 0
-            player.times_sat_out = 0
-            player.internal_times_sat_out = 0
             self.last_eliminated_players.remove(player)
 
         self.update_ui()
 
     def seed_last_8_players(self):
         """Prepare the final 8 players for the last rounds."""
+        # seed the last 8 players randomly
+        self.players = random.sample(self.players, 8)
         self.clear_layout(self.main_layout)
         layout = QVBoxLayout()
         layout.addWidget(QLabel("The final 8 players have been seeded."))
@@ -483,7 +513,7 @@ class Application(QWidget):
         self.players = winners
         self.eliminated_players.extend(eliminated)
 
-        if len(self.players) == 1:
+        if len(self.players) == 2:
             self.end_tournament()
         else:
             self.final_match_results.clear()  # Clear the results for the next stage
@@ -506,29 +536,79 @@ class Application(QWidget):
         elif column == 1:
             self.set_final_match_result(row, 2)
 
+
     def restart_tournament(self):
-        """Restart the tournament from scratch."""
+        """Restart the tournament with the same players."""
+        player_names = [player.name for player in self.players] + [player.name for player in self.eliminated_players]
+
+        # Clear all player data
         self.players.clear()
         self.eliminated_players.clear()
         self.last_eliminated_players.clear()
         self.matches.clear()
         self.unused_players.clear()
         self.match_results.clear()
+        self.final_match_results.clear()
 
+        # Close the current window and show the start page with pre-entered player names
         self.close()
-        start_page = StartPage()
-        start_page.show()
+        self.start_page = StartPage(player_names)
+        self.start_page.show()
+
+    def reset_tournament(self):
+        """Reset the tournament from scratch and delete all player data."""
+        # Clear all player data
+        self.players.clear()
+        self.eliminated_players.clear()
+        self.last_eliminated_players.clear()
+        self.matches.clear()
+        self.unused_players.clear()
+        self.match_results.clear()
+        self.final_match_results.clear()
+
+        # Close the current window and show the start page
+        self.close()
+        self.start_page = StartPage()
+        self.start_page.show()
 
     def end_tournament(self):
         """End the tournament and display the winner."""
         self.clear_layout(self.main_layout)
         layout = QVBoxLayout()
 
-        winner = self.players[0] if self.players else None
-        if winner:
-            layout.addWidget(QLabel(f"The tournament winner is: {winner.name}"))
+        if len(self.players) == 2:
+            winner_1 = self.players[0] 
+            winner_2 = self.players[1] 
+            layout.addWidget(QLabel(f"The tournament winner is: {winner_1.name} And {winner_2.name}"))
         else:
             layout.addWidget(QLabel("The tournament ended with no winner."))
+
+        # Add elimnted players back to the players list
+        self.players.extend(self.eliminated_players)
+
+        # Table with the player stats
+        player_table = QTableWidget(len(self.players), 4)
+        player_table.setHorizontalHeaderLabels(["Player Name", "Losses", "Wins", "Times Sat Out"])
+        player_table.setColumnWidth(0, 150)
+        player_table.setColumnWidth(1, 50)
+        player_table.setColumnWidth(2, 50)
+        player_table.setColumnWidth(3, 100)
+        for row, player in enumerate(self.players):
+            player_table.setItem(row, 0, QTableWidgetItem(player.name))
+            player_table.setItem(row, 1, QTableWidgetItem(str(player.stats.losses)))
+            player_table.setItem(row, 2, QTableWidgetItem(str(player.stats.wins)))
+            player_table.setItem(row, 3, QTableWidgetItem(str(player.stats.times_sat_out)))
+        layout.addWidget(player_table)
+
+
+        # Got to many errors with the restart button so I commented it out (Players already in the table)
+        # restart_button = QPushButton("Restart Tournament")
+        # restart_button.clicked.connect(self.restart_tournament)
+        # layout.addWidget(restart_button)
+
+        reset_button = QPushButton("Go Back to Start Page")
+        reset_button.clicked.connect(self.reset_tournament)
+        layout.addWidget(reset_button)
 
         exit_button = QPushButton("Exit")
         exit_button.clicked.connect(self.exit_tournament)
