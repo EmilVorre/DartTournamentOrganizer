@@ -7,6 +7,7 @@ from PyQt6.QtCore import Qt
 import random
 from player import Player  # Import the Player class
 from stats import Stats  # Import the Match class
+from stylesheet import stylesheet  # Import the stylesheet
 
 class PlayerItemWidget(QWidget):
     def __init__(self, player_name, remove_callback):
@@ -41,6 +42,8 @@ class StartPage(QWidget):
     def init_ui(self):
         self.setWindowTitle("Start Page")
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
         # Form layout for player names and max losses
         form_layout = QFormLayout()
@@ -168,53 +171,59 @@ class Application(QWidget):
         # Load and draw the dartboard image
         dartboard = QPixmap("dartboard.png")  # Path to your dartboard image
         if not dartboard.isNull():
-            painter.setOpacity(0.3)  # Make it semi-transparent
+            painter.setOpacity(1.0)  # Make it semi-transparent
             target_rect = self.rect()  # Fill the entire widget
             painter.drawPixmap(target_rect, dartboard)
 
     def show_matchmaking_ui(self):
         # Player Tables Layout
         player_tables_layout = QVBoxLayout()
+        player_tables_layout.setContentsMargins(0, 0, 0, 0)
+        player_tables_layout.setSpacing(0)
 
         # Player Table
         self.player_table = QTableWidget(len(self.players), 4)
         self.player_table.setHorizontalHeaderLabels(["Player Name", "Losses", "Wins", "Times Sat Out"])
-        self.player_table.setColumnWidth(0, 150)  # Adjust column width for Player Name
-        self.player_table.setColumnWidth(1, 50)   # Adjust column width for Losses
-        self.player_table.setColumnWidth(2, 50)   # Adjust column width for Wins
-        self.player_table.setColumnWidth(3, 100)  # Adjust column width for Times Sat Out
+        self.player_table.setColumnWidth(0, 200)  # Adjust column width for Player Name
+        self.player_table.setColumnWidth(1, 80)   # Adjust column width for Losses
+        self.player_table.setColumnWidth(2, 80)   # Adjust column width for Wins
+        self.player_table.setColumnWidth(3, 140)  # Adjust column width for Times Sat Out
         self.update_player_table()
         player_tables_layout.addWidget(self.player_table)
 
         # Eliminate Players Table
         self.eliminated_table = QTableWidget(0, 1)
         self.eliminated_table.setHorizontalHeaderLabels(["Eliminated Players"])
-        self.eliminated_table.setColumnWidth(0, 150)  # Adjust column width for Eliminated Players
+        self.eliminated_table.setColumnWidth(0, 200)  # Adjust column width for Eliminated Players
         player_tables_layout.addWidget(self.eliminated_table)
 
         self.main_layout.addLayout(player_tables_layout)
 
         # Matches and Players that Sit Out Layout
         matches_unused_layout = QVBoxLayout()
+        matches_unused_layout.setContentsMargins(0, 0, 0, 0)
+        matches_unused_layout.setSpacing(0)
 
         # Matches Table
         self.match_table = QTableWidget(0, 2)
         self.match_table.setHorizontalHeaderLabels(["Team 1", "Team 2"])
-        self.match_table.setColumnWidth(0, 200)  # Adjust column width for Team 1
-        self.match_table.setColumnWidth(1, 200)  # Adjust column width for Team 2
+        self.match_table.setColumnWidth(0, 300)  # Adjust column width for Team 1
+        self.match_table.setColumnWidth(1, 300)  # Adjust column width for Team 2
         self.match_table.cellClicked.connect(self.handle_cell_click)
         matches_unused_layout.addWidget(self.match_table)
 
         # Players that Sit Out Table
         self.unused_table = QTableWidget(0, 1)
         self.unused_table.setHorizontalHeaderLabels(["Players that Sit Out"])
-        self.unused_table.setColumnWidth(0, 150)  # Adjust column width for Players that Sit Out
+        self.unused_table.setColumnWidth(0, 200)  # Adjust column width for Players that Sit Out
         matches_unused_layout.addWidget(self.unused_table)
 
         self.main_layout.addLayout(matches_unused_layout)
 
         # Buttons Layout
         buttons_layout = QVBoxLayout()
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        buttons_layout.setSpacing(0)
 
         # Generate Matches Button
         self.generate_matches_button = QPushButton("Generate Matches")
@@ -226,6 +235,16 @@ class Application(QWidget):
         self.submit_results_button.setEnabled(False)
         self.submit_results_button.clicked.connect(self.handle_match_results)
         buttons_layout.addWidget(self.submit_results_button)
+
+        # Edit Losses Button
+        edit_losses_button = QPushButton("Edit Losses")
+        edit_losses_button.clicked.connect(self.edit_losses_for_players)
+        buttons_layout.addWidget(edit_losses_button)
+
+        # Eliminate Player Button
+        eliminate_player_button = QPushButton("Eliminate Player")
+        eliminate_player_button.clicked.connect(self.eliminate_a_selected_player)
+        buttons_layout.addWidget(eliminate_player_button)
 
         # Restart Tournament Button
         reset_tournament_button = QPushButton("Restart Tournament")
@@ -241,11 +260,13 @@ class Application(QWidget):
 
     def show_final_players(self):
         final_layout = QVBoxLayout()
+        final_layout.setContentsMargins(0, 0, 0, 0)
+        final_layout.setSpacing(0)
 
         # Remaining Players Table
         remaining_players_table = QTableWidget(len(self.players), 1)
         remaining_players_table.setHorizontalHeaderLabels(["Remaining Players"])
-        remaining_players_table.setColumnWidth(0, 150)  # Adjust column width for Remaining Players
+        remaining_players_table.setColumnWidth(0, 200)  # Adjust column width for Remaining Players
         for row, player in enumerate(self.players):
             remaining_players_table.setItem(row, 0, QTableWidgetItem(player.name))
         final_layout.addWidget(remaining_players_table)
@@ -254,7 +275,7 @@ class Application(QWidget):
             # Last Eliminated Players Table
             last_eliminated_table = QTableWidget(len(self.last_eliminated_players), 1)
             last_eliminated_table.setHorizontalHeaderLabels(["Last Eliminated Players"])
-            last_eliminated_table.setColumnWidth(0, 150)  # Adjust column width for Last Eliminated Players
+            last_eliminated_table.setColumnWidth(0, 220)  # Adjust column width for Last Eliminated Players
             for row, player in enumerate(self.last_eliminated_players):
                 last_eliminated_table.setItem(row, 0, QTableWidgetItem(player.name))
             final_layout.addWidget(last_eliminated_table)
@@ -284,6 +305,9 @@ class Application(QWidget):
         self.eliminated_table.setRowCount(len(self.eliminated_players))
         for row, player in enumerate(self.eliminated_players):
             self.eliminated_table.setItem(row, 0, QTableWidgetItem(player.name))
+
+    def set_table_items_transparent(self, table):
+        pass  # Remove the transparency setting logic
 
     def generate_random_matches(self):
         """Generate random 2v2 matches."""
@@ -394,6 +418,8 @@ class Application(QWidget):
         self.clear_layout(self.main_layout)
     
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         layout.addWidget(QLabel(f"Select {8 - len(self.players)} players from the last eliminated players to fill the spots:"))
     
         self.checkboxes = []
@@ -405,6 +431,7 @@ class Application(QWidget):
         submit_button = QPushButton("Submit Selection")
         # connect the button to the function that added the selected players back to the tournament
         submit_button.clicked.connect(self.add_selected_players)
+
         layout.addWidget(submit_button)
 
         self.main_layout.addLayout(layout)
@@ -414,7 +441,7 @@ class Application(QWidget):
         selected_players = [player for checkbox, player in self.checkboxes if checkbox.isChecked()]
         for player in selected_players:
             self.players.append(player)
-            self.last_eliminated_players.remove(player)
+            self.eliminated_players.remove(player)
 
         self.update_ui()
 
@@ -424,6 +451,8 @@ class Application(QWidget):
         self.players = random.sample(self.players, 8)
         self.clear_layout(self.main_layout)
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         layout.addWidget(QLabel("The final 8 players have been seeded."))
         seed_button = QPushButton("Proceed to Final Matches")
         seed_button.clicked.connect(self.show_final_matches)
@@ -449,6 +478,8 @@ class Application(QWidget):
         # Clear the layout and display the final matches
         self.clear_layout(self.main_layout)
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         label = QLabel(f"Knockout Stage - {stage_name}")
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
@@ -456,8 +487,8 @@ class Application(QWidget):
         # Matches table
         self.final_match_table = QTableWidget(num_matches, 2)
         self.final_match_table.setHorizontalHeaderLabels(["Team 1", "Team 2"])
-        self.final_match_table.setColumnWidth(0, 200)
-        self.final_match_table.setColumnWidth(1, 200)
+        self.final_match_table.setColumnWidth(0, 300)
+        self.final_match_table.setColumnWidth(1, 300)
         self.final_match_table.cellClicked.connect(self.handle_final_cell_click)
 
         if len(self.players) == 8:
@@ -477,7 +508,13 @@ class Application(QWidget):
             self.final_match_table.setItem(0, 0, QTableWidgetItem(team_1.name))
             self.final_match_table.setItem(0, 1, QTableWidgetItem(team_2.name))
 
-        layout.addWidget(self.final_match_table)
+        table_layout = QVBoxLayout()
+        table_layout.setContentsMargins(0, 0, 0, 0)
+        table_layout.setSpacing(0)
+        table_layout.addWidget(self.final_match_table)
+        table_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+
+        layout.addLayout(table_layout)
 
         # Buttons
         submit_results_button = QPushButton("Submit Final Results")
@@ -501,13 +538,25 @@ class Application(QWidget):
             if result == 1:
                 team_1 = self.final_match_table.item(row, 0).text().split(", ")
                 winners.extend([player for player in self.players if player.name in team_1])
+                for player in self.players:
+                    if player.name in team_1:
+                        player.add_win_stats()
                 team_2 = self.final_match_table.item(row, 1).text().split(", ")
                 eliminated.extend([player for player in self.players if player.name in team_2])
+                for player in self.players:
+                    if player.name in team_2:
+                        player.add_loss_stats()
             elif result == 2:
                 team_2 = self.final_match_table.item(row, 1).text().split(", ")
                 winners.extend([player for player in self.players if player.name in team_2])
+                for player in self.players:
+                    if player.name in team_2:
+                        player.add_win_stats()
                 team_1 = self.final_match_table.item(row, 0).text().split(", ")
                 eliminated.extend([player for player in self.players if player.name in team_1])
+                for player in self.players:
+                    if player.name in team_1:
+                        player.add_loss_stats()
 
         # Update players and eliminated lists
         self.players = winners
@@ -536,9 +585,45 @@ class Application(QWidget):
         elif column == 1:
             self.set_final_match_result(row, 2)
 
+    def edit_losses_for_players(self):
+        """Edit the losses for selected players."""
+        headline = QLabel("Select the players to remove 1 loss from:")
+        layout = QVBoxLayout()
+        layout.addWidget(headline)
+
+        dialog = PlayerSelectionDialog(self.players)
+        dialog.exec()
+        selected_players = dialog.get_selected_players()
+        for player in self.players:
+            if player.name in selected_players:
+                player.stats.losses -= 1
+                player.losses -= 1
+        
+        # Update the player table after editing losses
+        self.update_player_table()
+
+    def eliminate_a_selected_player(self):
+        """Eliminate a selected player from the tournament."""
+        headline = QLabel("Select the player to eliminate:")
+        layout = QVBoxLayout()
+        layout.addWidget(headline)
+
+        dialog = PlayerSelectionDialog(self.players)
+        dialog.exec()
+        selected_players = dialog.get_selected_players()
+        for player in self.players:
+            if player.name in selected_players:
+                player.eliminate()
+
+        # Update the player table after eliminating a player
+        self.update_player_table
 
     def restart_tournament(self):
         """Restart the tournament with the same players."""
+        reply = QMessageBox.question(self, 'Restart Tournament', 'Are you sure you want to restart the tournament?', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if reply == QMessageBox.StandardButton.No:
+            return
+
         player_names = [player.name for player in self.players] + [player.name for player in self.eliminated_players]
 
         # Clear all player data
@@ -557,6 +642,10 @@ class Application(QWidget):
 
     def reset_tournament(self):
         """Reset the tournament from scratch and delete all player data."""
+        reply = QMessageBox.question(self, 'End The Tournament', 'Are you sure you want to restart the tournament?', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if reply == QMessageBox.StandardButton.No:
+            return
+
         # Clear all player data
         self.players.clear()
         self.eliminated_players.clear()
@@ -586,25 +675,29 @@ class Application(QWidget):
         # Add elimnted players back to the players list
         self.players.extend(self.eliminated_players)
 
+        # Delete array of eliminated players
+        self.eliminated_players.clear()
+
         # Table with the player stats
         player_table = QTableWidget(len(self.players), 4)
         player_table.setHorizontalHeaderLabels(["Player Name", "Losses", "Wins", "Times Sat Out"])
-        player_table.setColumnWidth(0, 150)
-        player_table.setColumnWidth(1, 50)
-        player_table.setColumnWidth(2, 50)
-        player_table.setColumnWidth(3, 100)
+        player_table.setColumnWidth(0, 200)
+        player_table.setColumnWidth(1, 80)
+        player_table.setColumnWidth(2, 80)
+        player_table.setColumnWidth(3, 140)
         for row, player in enumerate(self.players):
             player_table.setItem(row, 0, QTableWidgetItem(player.name))
             player_table.setItem(row, 1, QTableWidgetItem(str(player.stats.losses)))
             player_table.setItem(row, 2, QTableWidgetItem(str(player.stats.wins)))
             player_table.setItem(row, 3, QTableWidgetItem(str(player.stats.times_sat_out)))
+        
         layout.addWidget(player_table)
 
 
         # Got to many errors with the restart button so I commented it out (Players already in the table)
-        # restart_button = QPushButton("Restart Tournament")
-        # restart_button.clicked.connect(self.restart_tournament)
-        # layout.addWidget(restart_button)
+        restart_button = QPushButton("Restart Tournament")
+        restart_button.clicked.connect(self.restart_tournament)
+        layout.addWidget(restart_button)
 
         reset_button = QPushButton("Go Back to Start Page")
         reset_button.clicked.connect(self.reset_tournament)
@@ -649,6 +742,7 @@ class PlayerSelectionDialog(QDialog):
 
 # Start the application
 app = QApplication([])
+app.setStyleSheet(stylesheet)
 start_page = StartPage()
 start_page.show()
 app.exec()

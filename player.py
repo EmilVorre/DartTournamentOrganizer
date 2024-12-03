@@ -21,6 +21,12 @@ class Player:
         self.stats.add_win()
         self.wins += 1
 
+    def add_win_stats(self):
+        self.stats.add_win()
+
+    def add_loss_stats(self):
+        self.stats.add_loss()
+        
     def sit_out(self):
         self.stats.sit_out()
         self.times_sat_out += 1
@@ -31,7 +37,6 @@ class Player:
 
     def eliminate(self):
         self.stats.eliminate_player()
-        print(f"{self.name} has been eliminated.")
         self.app.eliminated_players.append(self)
         self.app.players.remove(self)
         self.app.update_eliminated_table()
