@@ -114,7 +114,7 @@ class StartPage(QWidget):
 
     def add_test_players(self):
         max_losses = self.max_losses.value()
-        players = [Player(f"Player{i + 1}", None) for i in range(17)]
+        players = [Player(f"Player{i + 1}", None) for i in range(19)]
         self.switch_to_matchmaking(players, max_losses)
 
     def switch_to_matchmaking(self, players, max_losses):
@@ -189,17 +189,17 @@ class Application(QWidget):
         self.player_table.setColumnWidth(2, 80)   # Adjust column width for Wins
         self.player_table.setColumnWidth(3, 140)  # Adjust column width for Times Sat Out
         self.update_player_table()
-        player_tables_layout.addWidget(self.player_table)
+        player_tables_layout.addWidget(self.player_table, stretch=5)
 
-        # Eliminate Players Table
-        self.eliminated_table = QTableWidget(0, 1)
-        self.eliminated_table.setHorizontalHeaderLabels(["Eliminated Players"])
-        self.eliminated_table.setColumnWidth(0, 200)  # Adjust column width for Eliminated Players
-        player_tables_layout.addWidget(self.eliminated_table)
+        # Players that Sit Out Table
+        self.unused_table = QTableWidget(0, 1)
+        self.unused_table.setHorizontalHeaderLabels(["Players that Sit Out"])
+        self.unused_table.setColumnWidth(0, 200)  # Adjust column width for Players that Sit Out
+        player_tables_layout.addWidget(self.unused_table, stretch=1)
 
         self.main_layout.addLayout(player_tables_layout)
 
-        # Matches and Players that Sit Out Layout
+        # Matches and Eliminated Players Layout
         matches_unused_layout = QVBoxLayout()
         matches_unused_layout.setContentsMargins(0, 0, 0, 0)
         matches_unused_layout.setSpacing(0)
@@ -212,11 +212,11 @@ class Application(QWidget):
         self.match_table.cellClicked.connect(self.handle_cell_click)
         matches_unused_layout.addWidget(self.match_table)
 
-        # Players that Sit Out Table
-        self.unused_table = QTableWidget(0, 1)
-        self.unused_table.setHorizontalHeaderLabels(["Players that Sit Out"])
-        self.unused_table.setColumnWidth(0, 200)  # Adjust column width for Players that Sit Out
-        matches_unused_layout.addWidget(self.unused_table)
+        # Eliminated Players Table
+        self.eliminated_table = QTableWidget(0, 1)
+        self.eliminated_table.setHorizontalHeaderLabels(["Eliminated Players"])
+        self.eliminated_table.setColumnWidth(0, 200)  # Adjust column width for Eliminated Players
+        matches_unused_layout.addWidget(self.eliminated_table)
 
         self.main_layout.addLayout(matches_unused_layout)
 
