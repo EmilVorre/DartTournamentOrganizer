@@ -70,8 +70,8 @@ class StartPage(QWidget):
         start_button.clicked.connect(self.start_tournament)
         layout.addWidget(start_button)
 
-        # Button to add 17 players for testing
-        #test_button = QPushButton("Add 17 Players for Testing")
+        # Button to add 35 players for testing
+        #test_button = QPushButton("Add 35 Players for Testing")
         #test_button.clicked.connect(self.add_test_players)
         #layout.addWidget(test_button)
 
@@ -161,30 +161,7 @@ class Application(QWidget):
         else:
             self.show_matchmaking_ui()
 
-    def paintEvent(self, event):
-        super().paintEvent(event)
-
-        # Create a painter to draw the dartboard
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-
-        # Load and draw the dartboard image
-        dartboard = QPixmap("dartboard.png")  # Path to your dartboard image
-        if not dartboard.isNull():
-            painter.setOpacity(1.0)  # Make it semi-transparent
-            target_rect = self.rect()  # Fill the entire widget
-            painter.drawPixmap(target_rect, dartboard)
-
     def show_matchmaking_ui(self):
-        # Check if the widget already has a layout and remove it
-        if self.layout() is not None:
-            QWidget().setLayout(self.layout())
-
-        # Main Layout
-        main_layout = QHBoxLayout()
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
-
         # Player Tables Layout (Left Side)
         player_tables_layout = QVBoxLayout()
         player_tables_layout.setContentsMargins(0, 0, 0, 0)
@@ -200,7 +177,7 @@ class Application(QWidget):
         self.update_player_table()
         player_tables_layout.addWidget(self.player_table)
 
-        main_layout.addLayout(player_tables_layout, stretch=1)
+        self.main_layout.addLayout(player_tables_layout, stretch=1)
 
         # Matches and Other Tables Layout (Right Side)
         right_side_layout = QVBoxLayout()
@@ -227,7 +204,7 @@ class Application(QWidget):
         self.eliminated_table.setColumnWidth(0, 200)  # Adjust column width for Eliminated Players
         right_side_layout.addWidget(self.eliminated_table, stretch=3)
 
-        main_layout.addLayout(right_side_layout, stretch=2)
+        self.main_layout.addLayout(right_side_layout, stretch=2)
 
         # Buttons Layout
         buttons_layout = QVBoxLayout()
@@ -239,7 +216,7 @@ class Application(QWidget):
         self.generate_matches_button.clicked.connect(self.generate_random_matches)
         buttons_layout.addWidget(self.generate_matches_button)
 
-        # Submit results button
+        # Submit Results Button
         self.submit_results_button = QPushButton("Submit Results")
         self.submit_results_button.setEnabled(False)
         self.submit_results_button.clicked.connect(self.handle_match_results)
@@ -265,15 +242,14 @@ class Application(QWidget):
         end_tournament_button.clicked.connect(self.reset_tournament)
         buttons_layout.addWidget(end_tournament_button)
 
-        main_layout.addLayout(buttons_layout)
-
-        self.setLayout(main_layout)
+        self.main_layout.addLayout(buttons_layout)
 
     def show_final_players(self):
         final_layout = QVBoxLayout()
         final_layout.setContentsMargins(0, 0, 0, 0)
         final_layout.setSpacing(0)
-
+        # Add widgets to final_layout as needed
+        
         # Remaining Players Table
         remaining_players_table = QTableWidget(len(self.players), 1)
         remaining_players_table.setHorizontalHeaderLabels(["Remaining Players"])
@@ -303,6 +279,20 @@ class Application(QWidget):
             final_layout.addWidget(proceed_button)
 
         self.main_layout.addLayout(final_layout)
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+
+        # Create a painter to draw the dartboard
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # Load and draw the dartboard image
+        dartboard = QPixmap("dartboard.png")  # Path to your dartboard image
+        if not dartboard.isNull():
+            painter.setOpacity(1.0)  # Make it semi-transparent
+            target_rect = self.rect()  # Fill the entire widget
+            painter.drawPixmap(target_rect, dartboard)
 
     def update_player_table(self):
         self.player_table.setRowCount(len(self.players))
