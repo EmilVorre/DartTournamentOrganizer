@@ -138,7 +138,7 @@ class Application(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle("Dart Tournament")
+        self.setWindowTitle("Matchmaking Frontend")
         self.main_layout = QHBoxLayout()
         self.setLayout(self.main_layout)
         self.status_label = QLabel("Status: Waiting for matches to be generated.")
@@ -373,12 +373,6 @@ class Application(QWidget):
             team_2_names = ", ".join(player.name for player in team_2)
             self.match_table.setItem(row, 0, QTableWidgetItem(team_1_names))
             self.match_table.setItem(row, 1, QTableWidgetItem(team_2_names))
-
-        for row in range(self.match_table.rowCount()):
-            for column in range(self.match_table.columnCount()):
-                item = self.match_table.item(row, column)
-                if item is not None:
-                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # update the players that sit out table
         self.unused_table.setRowCount(len(self.unused_players))
