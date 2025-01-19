@@ -176,7 +176,7 @@ class Application(QWidget):
             painter.drawPixmap(target_rect, dartboard)
 
     def show_matchmaking_ui(self):
-        # Player Tables Layout
+        # Player Tables Layout (Left Side)
         player_tables_layout = QVBoxLayout()
         player_tables_layout.setContentsMargins(0, 0, 0, 0)
         player_tables_layout.setSpacing(0)
@@ -189,20 +189,14 @@ class Application(QWidget):
         self.player_table.setColumnWidth(2, 80)   # Adjust column width for Wins
         self.player_table.setColumnWidth(3, 140)  # Adjust column width for Times Sat Out
         self.update_player_table()
-        player_tables_layout.addWidget(self.player_table, stretch=5)
+        player_tables_layout.addWidget(self.player_table)
 
-        # Players that Sit Out Table
-        self.unused_table = QTableWidget(0, 1)
-        self.unused_table.setHorizontalHeaderLabels(["Players that Sit Out"])
-        self.unused_table.setColumnWidth(0, 200)  # Adjust column width for Players that Sit Out
-        player_tables_layout.addWidget(self.unused_table, stretch=1)
+        self.main_layout.addLayout(player_tables_layout, stretch=1)
 
-        self.main_layout.addLayout(player_tables_layout)
-
-        # Matches and Eliminated Players Layout
-        matches_unused_layout = QVBoxLayout()
-        matches_unused_layout.setContentsMargins(0, 0, 0, 0)
-        matches_unused_layout.setSpacing(0)
+        # Matches and Other Tables Layout (Right Side)
+        right_side_layout = QVBoxLayout()
+        right_side_layout.setContentsMargins(0, 0, 0, 0)
+        right_side_layout.setSpacing(0)
 
         # Matches Table
         self.match_table = QTableWidget(0, 2)
@@ -210,15 +204,21 @@ class Application(QWidget):
         self.match_table.setColumnWidth(0, 300)  # Adjust column width for Team 1
         self.match_table.setColumnWidth(1, 300)  # Adjust column width for Team 2
         self.match_table.cellClicked.connect(self.handle_cell_click)
-        matches_unused_layout.addWidget(self.match_table)
+        right_side_layout.addWidget(self.match_table, stretch=2)
+
+        # Players that Sit Out Table
+        self.unused_table = QTableWidget(0, 1)
+        self.unused_table.setHorizontalHeaderLabels(["Players that Sit Out"])
+        self.unused_table.setColumnWidth(0, 200)  # Adjust column width for Players that Sit Out
+        right_side_layout.addWidget(self.unused_table, stretch=1)
 
         # Eliminated Players Table
         self.eliminated_table = QTableWidget(0, 1)
         self.eliminated_table.setHorizontalHeaderLabels(["Eliminated Players"])
         self.eliminated_table.setColumnWidth(0, 200)  # Adjust column width for Eliminated Players
-        matches_unused_layout.addWidget(self.eliminated_table)
+        right_side_layout.addWidget(self.eliminated_table, stretch=3)
 
-        self.main_layout.addLayout(matches_unused_layout)
+        self.main_layout.addLayout(right_side_layout, stretch=2)
 
         # Buttons Layout
         buttons_layout = QVBoxLayout()
@@ -230,7 +230,7 @@ class Application(QWidget):
         self.generate_matches_button.clicked.connect(self.generate_random_matches)
         buttons_layout.addWidget(self.generate_matches_button)
 
-        # Submit Results Button
+        # Submit results button
         self.submit_results_button = QPushButton("Submit Results")
         self.submit_results_button.setEnabled(False)
         self.submit_results_button.clicked.connect(self.handle_match_results)
@@ -257,6 +257,8 @@ class Application(QWidget):
         buttons_layout.addWidget(end_tournament_button)
 
         self.main_layout.addLayout(buttons_layout)
+
+        self.setLayout(self.main_layout)
 
     def show_final_players(self):
         final_layout = QVBoxLayout()
