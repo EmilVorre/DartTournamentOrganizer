@@ -227,7 +227,7 @@ class Application(QWidget):
 
         # Generate Matches Button
         self.generate_matches_button = QPushButton("Generate Matches")
-        self.generate_matches_button.clicked.connect(self.generate_random_matches)
+        self.generate_matches_button.clicked.connect(self.generate_gruppeplay_matches)
         buttons_layout.addWidget(self.generate_matches_button)
 
         # Submit results button
@@ -311,6 +311,62 @@ class Application(QWidget):
     def set_table_items_transparent(self, table):
         pass  # Remove the transparency setting logic
 
+    def generate_gruppeplay_matches(self):
+        """Generate random 2v2 matches."""
+        # update state of buttons
+        self.generate_matches_button.setEnabled(False)
+        self.submit_results_button.setEnabled(True)
+
+        # Clear previous match results and last eliminated players
+        self.match_results.clear()
+        self.last_eliminated_players.clear()
+
+        # declare players
+        available_players = [player for player in self.players if player not in self.eliminated_players]
+
+        # sort players by unused count (Descending)
+        available_players.sort(key=lambda player: (player.internal_times_sat_out, random.random()))
+        self.matches = []
+        self.unused_players = []
+
+        # find the players that will sit the round out and remove them from the available players
+        excess_people = len(available_players) % 4
+        self.unused_players = available_players[-excess_people:] if excess_people > 0 else []
+        available_players = available_players[:-excess_people] if excess_people > 0 else available_players
+
+        # randomize seeds for the players and sort them
+        for player in available_players:
+            player.random_seed()
+
+        available_players.sort(key=lambda player: player.seed)
+
+        # split the players into teams of 4
+        for i in range(0, len(available_players), 4):
+            group = available_players[i:i + 4]
+            if len(group) == 4:
+                self.matches.append((group[:2], group[2:]))
+            else:
+                self.unused_players.extend(group)
+
+        # increment the unused count for players who are unused
+        for player in self.unused_players:
+            player.sit_out()
+
+        # update the matches table
+        self.match_table.setRowCount(len(self.matches))
+        for row, (team_1, team_2) in enumerate(self.matches):
+            team_1_names = ", ".join(player.name for player in team_1)
+            team_2_names = ", ".join(player.name for player in team_2)
+            self.match_table.setItem(row, 0, QTableWidgetItem(team_1_names))
+            self.match_table.setItem(row, 1, QTableWidgetItem(team_2_names))
+
+        # update the players that sit out table
+        self.unused_table.setRowCount(len(self.unused_players))
+        for row, player in enumerate(self.unused_players):
+            self.unused_table.setItem(row, 0, QTableWidgetItem(player.name))
+        
+
+    # old match generation function (was not fully random)    
     def generate_random_matches(self):
         """Generate random 2v2 matches."""
         # Clear previous match results and last eliminated players
