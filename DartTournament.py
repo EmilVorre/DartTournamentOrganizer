@@ -1,8 +1,10 @@
 from PyQt6.QtWidgets import (
     QApplication, QTableWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout,
-    QPushButton, QDialogButtonBox, QLabel, QWidget, QDialog, QGridLayout, QLineEdit, QSpinBox, QFormLayout, QListWidget, QListWidgetItem, QMessageBox, QCheckBox
+    QPushButton, QDialogButtonBox, QLabel, QWidget, QDialog, QGridLayout, QLineEdit, 
+    QSpinBox, QFormLayout, QListWidget, QListWidgetItem, QMessageBox, QCheckBox,
+    
 )
-from PyQt6.QtGui import QPainter, QPixmap
+from PyQt6.QtGui import QPainter, QPixmap, QPalette, QColor
 from PyQt6.QtCore import Qt
 import random
 from player import Player  # Import the Player class
@@ -40,7 +42,7 @@ class StartPage(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle("Start Page")
+        self.setWindowTitle("Dart Tournament")
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
@@ -191,7 +193,15 @@ class Application(QWidget):
         self.update_player_table()
         player_tables_layout.addWidget(self.player_table)
 
+        # Set alternating row colors
+        self.player_table.setAlternatingRowColors(True)
+        palette = self.player_table.palette()
+        palette.setColor(QPalette.ColorRole.AlternateBase, QColor(210, 210, 210))  # Light grey color
+        self.player_table.setPalette(palette)
+
         self.main_layout.addLayout(player_tables_layout, stretch=1)
+
+
 
         # Matches and Other Tables Layout (Right Side)
         right_side_layout = QVBoxLayout()
