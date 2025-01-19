@@ -71,9 +71,9 @@ class StartPage(QWidget):
         layout.addWidget(start_button)
 
         # Button to add 17 players for testing
-        test_button = QPushButton("Add 17 Players for Testing")
-        test_button.clicked.connect(self.add_test_players)
-        layout.addWidget(test_button)
+        #test_button = QPushButton("Add 17 Players for Testing")
+        #test_button.clicked.connect(self.add_test_players)
+        #layout.addWidget(test_button)
 
         self.setLayout(layout)
 
@@ -114,7 +114,7 @@ class StartPage(QWidget):
 
     def add_test_players(self):
         max_losses = self.max_losses.value()
-        players = [Player(f"Player{i + 1}", None) for i in range(19)]
+        players = [Player(f"Player{i + 1}", None) for i in range(35)]
         self.switch_to_matchmaking(players, max_losses)
 
     def switch_to_matchmaking(self, players, max_losses):
@@ -190,9 +190,14 @@ class Application(QWidget):
         self.player_table.setColumnWidth(3, 140)  # Adjust column width for Times Sat Out
         self.update_player_table()
         player_tables_layout.addWidget(self.player_table)
+        player_tables_layout.addWidget(self.player_table)
 
         self.main_layout.addLayout(player_tables_layout, stretch=1)
 
+        # Matches and Other Tables Layout (Right Side)
+        right_side_layout = QVBoxLayout()
+        right_side_layout.setContentsMargins(0, 0, 0, 0)
+        right_side_layout.setSpacing(0)
         # Matches and Other Tables Layout (Right Side)
         right_side_layout = QVBoxLayout()
         right_side_layout.setContentsMargins(0, 0, 0, 0)
@@ -211,11 +216,19 @@ class Application(QWidget):
         self.unused_table.setHorizontalHeaderLabels(["Players that Sit Out"])
         self.unused_table.setColumnWidth(0, 200)  # Adjust column width for Players that Sit Out
         right_side_layout.addWidget(self.unused_table, stretch=1)
+        right_side_layout.addWidget(self.match_table, stretch=2)
+
+        # Players that Sit Out Table
+        self.unused_table = QTableWidget(0, 1)
+        self.unused_table.setHorizontalHeaderLabels(["Players that Sit Out"])
+        self.unused_table.setColumnWidth(0, 200)  # Adjust column width for Players that Sit Out
+        right_side_layout.addWidget(self.unused_table, stretch=1)
 
         # Eliminated Players Table
         self.eliminated_table = QTableWidget(0, 1)
         self.eliminated_table.setHorizontalHeaderLabels(["Eliminated Players"])
         self.eliminated_table.setColumnWidth(0, 200)  # Adjust column width for Eliminated Players
+        right_side_layout.addWidget(self.eliminated_table, stretch=3)
         right_side_layout.addWidget(self.eliminated_table, stretch=3)
 
         self.main_layout.addLayout(right_side_layout, stretch=2)
@@ -230,6 +243,7 @@ class Application(QWidget):
         self.generate_matches_button.clicked.connect(self.generate_gruppeplay_matches)
         buttons_layout.addWidget(self.generate_matches_button)
 
+        # Submit results button
         # Submit results button
         self.submit_results_button = QPushButton("Submit Results")
         self.submit_results_button.setEnabled(False)
@@ -684,7 +698,8 @@ class Application(QWidget):
 
     def restart_tournament(self):
         """Restart the tournament with the same players."""
-        reply = QMessageBox.question(self, 'Restart Tournament', 'Are you sure you want to restart the tournament?', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        reply = QMessageBox.question(self, 'End The Tournament', 'Are you sure you want to restart the tournament?', 
+                                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.No:
             return
 
@@ -706,7 +721,8 @@ class Application(QWidget):
 
     def reset_tournament(self):
         """Reset the tournament from scratch and delete all player data."""
-        reply = QMessageBox.question(self, 'End The Tournament', 'Are you sure you want to restart the tournament?', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        reply = QMessageBox.question(self, 'End The Tournament', 'Are you sure you want to end the tournament?', 
+                                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.No:
             return
 
