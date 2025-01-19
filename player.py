@@ -1,4 +1,5 @@
 from stats import Stats
+import random
 
 class Player:
     def __init__(self, name, app):
@@ -9,7 +10,13 @@ class Player:
         self.internal_times_sat_out = 0
         self.app = app
         self.stats = Stats()
+        self.seed = 0
 
+    def reset_seed(self):
+        self.seed = 0
+
+    def random_seed(self):
+        self.seed = random.randint(1, 1000000)
 
     def add_loss(self):
         self.stats.add_loss()

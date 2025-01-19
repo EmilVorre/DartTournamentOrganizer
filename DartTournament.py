@@ -138,7 +138,7 @@ class Application(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle("Matchmaking Frontend")
+        self.setWindowTitle("Dart Tournament")
         self.main_layout = QHBoxLayout()
         self.setLayout(self.main_layout)
         self.status_label = QLabel("Status: Waiting for matches to be generated.")
@@ -176,15 +176,6 @@ class Application(QWidget):
             painter.drawPixmap(target_rect, dartboard)
 
     def show_matchmaking_ui(self):
-        # Check if the widget already has a layout and remove it
-        if self.layout() is not None:
-            QWidget().setLayout(self.layout())
-
-        # Main Layout
-        main_layout = QHBoxLayout()
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
-
         # Player Tables Layout (Left Side)
         player_tables_layout = QVBoxLayout()
         player_tables_layout.setContentsMargins(0, 0, 0, 0)
@@ -199,9 +190,14 @@ class Application(QWidget):
         self.player_table.setColumnWidth(3, 140)  # Adjust column width for Times Sat Out
         self.update_player_table()
         player_tables_layout.addWidget(self.player_table)
+        player_tables_layout.addWidget(self.player_table)
 
-        main_layout.addLayout(player_tables_layout, stretch=1)
+        self.main_layout.addLayout(player_tables_layout, stretch=1)
 
+        # Matches and Other Tables Layout (Right Side)
+        right_side_layout = QVBoxLayout()
+        right_side_layout.setContentsMargins(0, 0, 0, 0)
+        right_side_layout.setSpacing(0)
         # Matches and Other Tables Layout (Right Side)
         right_side_layout = QVBoxLayout()
         right_side_layout.setContentsMargins(0, 0, 0, 0)
@@ -220,14 +216,22 @@ class Application(QWidget):
         self.unused_table.setHorizontalHeaderLabels(["Players that Sit Out"])
         self.unused_table.setColumnWidth(0, 200)  # Adjust column width for Players that Sit Out
         right_side_layout.addWidget(self.unused_table, stretch=1)
+        right_side_layout.addWidget(self.match_table, stretch=2)
+
+        # Players that Sit Out Table
+        self.unused_table = QTableWidget(0, 1)
+        self.unused_table.setHorizontalHeaderLabels(["Players that Sit Out"])
+        self.unused_table.setColumnWidth(0, 200)  # Adjust column width for Players that Sit Out
+        right_side_layout.addWidget(self.unused_table, stretch=1)
 
         # Eliminated Players Table
         self.eliminated_table = QTableWidget(0, 1)
         self.eliminated_table.setHorizontalHeaderLabels(["Eliminated Players"])
         self.eliminated_table.setColumnWidth(0, 200)  # Adjust column width for Eliminated Players
         right_side_layout.addWidget(self.eliminated_table, stretch=3)
+        right_side_layout.addWidget(self.eliminated_table, stretch=3)
 
-        main_layout.addLayout(right_side_layout, stretch=2)
+        self.main_layout.addLayout(right_side_layout, stretch=2)
 
         # Buttons Layout
         buttons_layout = QVBoxLayout()
@@ -236,9 +240,10 @@ class Application(QWidget):
 
         # Generate Matches Button
         self.generate_matches_button = QPushButton("Generate Matches")
-        self.generate_matches_button.clicked.connect(self.generate_random_matches)
+        self.generate_matches_button.clicked.connect(self.generate_gruppeplay_matches)
         buttons_layout.addWidget(self.generate_matches_button)
 
+        # Submit results button
         # Submit results button
         self.submit_results_button = QPushButton("Submit Results")
         self.submit_results_button.setEnabled(False)
@@ -265,9 +270,9 @@ class Application(QWidget):
         end_tournament_button.clicked.connect(self.reset_tournament)
         buttons_layout.addWidget(end_tournament_button)
 
-        main_layout.addLayout(buttons_layout)
+        self.main_layout.addLayout(buttons_layout)
 
-        self.setLayout(main_layout)
+        self.setLayout(self.main_layout)
 
     def show_final_players(self):
         final_layout = QVBoxLayout()
@@ -320,6 +325,68 @@ class Application(QWidget):
     def set_table_items_transparent(self, table):
         pass  # Remove the transparency setting logic
 
+    def generate_gruppeplay_matches(self):
+        """Generate random 2v2 matches."""
+        # update state of buttons
+        self.generate_matches_button.setEnabled(False)
+        self.submit_results_button.setEnabled(True)
+
+        # Clear previous match results and last eliminated players
+        self.match_results.clear()
+        self.last_eliminated_players.clear()
+
+        # declare players
+        available_players = [player for player in self.players if player not in self.eliminated_players]
+
+        # sort players by unused count (Descending)
+        available_players.sort(key=lambda player: (player.internal_times_sat_out, random.random()))
+        self.matches = []
+        self.unused_players = []
+
+        # find the players that will sit the round out and remove them from the available players
+        excess_people = len(available_players) % 4
+        self.unused_players = available_players[-excess_people:] if excess_people > 0 else []
+        available_players = available_players[:-excess_people] if excess_people > 0 else available_players
+
+        # randomize seeds for the players and sort them
+        for player in available_players:
+            player.random_seed()
+
+        available_players.sort(key=lambda player: player.seed)
+
+        # split the players into teams of 4
+        for i in range(0, len(available_players), 4):
+            group = available_players[i:i + 4]
+            if len(group) == 4:
+                self.matches.append((group[:2], group[2:]))
+            else:
+                self.unused_players.extend(group)
+
+        # increment the unused count for players who are unused
+        for player in self.unused_players:
+            player.sit_out()
+
+        # update the matches table
+        self.match_table.setRowCount(len(self.matches))
+        for row, (team_1, team_2) in enumerate(self.matches):
+            team_1_names = ", ".join(player.name for player in team_1)
+            team_2_names = ", ".join(player.name for player in team_2)
+            self.match_table.setItem(row, 0, QTableWidgetItem(team_1_names))
+            self.match_table.setItem(row, 1, QTableWidgetItem(team_2_names))
+
+        for row in range(self.match_table.rowCount()):
+            for column in range(self.match_table.columnCount()):
+                item = self.match_table.item(row, column)
+                if item is not None:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # update the players that sit out table
+        self.unused_table.setRowCount(len(self.unused_players))
+        for row, player in enumerate(self.unused_players):
+            self.unused_table.setItem(row, 0, QTableWidgetItem(player.name))
+        
+
+    # old match generation function (was not fully random)    
     def generate_random_matches(self):
         """Generate random 2v2 matches."""
         # Clear previous match results and last eliminated players
