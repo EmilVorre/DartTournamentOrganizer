@@ -64,16 +64,19 @@ class StartPage(QWidget):
 
         # Button to add player name to the list
         add_player_button = QPushButton("Add Player")
+        add_player_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
         add_player_button.clicked.connect(self.add_player)
         layout.addWidget(add_player_button)
 
         # Button to start the tournament
         start_button = QPushButton("Start Tournament")
+        start_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
         start_button.clicked.connect(self.start_tournament)
         layout.addWidget(start_button)
 
         # Button to add 17 players for testing
         test_button = QPushButton("Add 17 Players for Testing")
+        test_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
         test_button.clicked.connect(self.add_test_players)
         layout.addWidget(test_button)
 
@@ -199,14 +202,17 @@ class Application(QWidget):
         palette.setColor(QPalette.ColorRole.AlternateBase, QColor(210, 210, 210))  # Light grey color
         self.player_table.setPalette(palette)
 
+        # Set header color to light blue
+        self.player_table.horizontalHeader().setStyleSheet("QHeaderView::section { background-color: rgb(104, 205, 254); }")
+
         self.main_layout.addLayout(player_tables_layout, stretch=1)
-
-
 
         # Matches and Other Tables Layout (Right Side)
         right_side_layout = QVBoxLayout()
         right_side_layout.setContentsMargins(0, 0, 0, 0)
         right_side_layout.setSpacing(0)
+
+        
 
         # Matches Table
         self.match_table = QTableWidget(0, 2)
@@ -216,17 +222,44 @@ class Application(QWidget):
         self.match_table.cellClicked.connect(self.handle_cell_click)
         right_side_layout.addWidget(self.match_table, stretch=2)
 
+        # Set alternating row colors
+        self.match_table.setAlternatingRowColors(True)
+        palette = self.match_table.palette()
+        palette.setColor(QPalette.ColorRole.AlternateBase, QColor(210, 210, 210))  # Light grey color
+        self.match_table.setPalette(palette)
+
+        # Set header color to light blue
+        self.match_table.horizontalHeader().setStyleSheet("QHeaderView::section { background-color: rgb(104, 205, 254); }")
+
         # Players that Sit Out Table
         self.unused_table = QTableWidget(0, 1)
         self.unused_table.setHorizontalHeaderLabels(["Players that Sit Out"])
         self.unused_table.setColumnWidth(0, 200)  # Adjust column width for Players that Sit Out
         right_side_layout.addWidget(self.unused_table, stretch=1)
 
+        # Set alternating row colors
+        self.unused_table.setAlternatingRowColors(True)
+        palette = self.unused_table.palette()
+        palette.setColor(QPalette.ColorRole.AlternateBase, QColor(210, 210, 210))  # Light grey color
+        self.unused_table.setPalette(palette)
+
+        # Set header color to light blue
+        self.unused_table.horizontalHeader().setStyleSheet("QHeaderView::section { background-color: rgb(104, 205, 254); }")
+
         # Eliminated Players Table
         self.eliminated_table = QTableWidget(0, 1)
         self.eliminated_table.setHorizontalHeaderLabels(["Eliminated Players"])
         self.eliminated_table.setColumnWidth(0, 200)  # Adjust column width for Eliminated Players
         right_side_layout.addWidget(self.eliminated_table, stretch=3)
+
+        # Set alternating row colors
+        self.eliminated_table.setAlternatingRowColors(True)
+        palette = self.eliminated_table.palette()
+        palette.setColor(QPalette.ColorRole.AlternateBase, QColor(210, 210, 210))  # Light grey color
+        self.eliminated_table.setPalette(palette)
+
+        # Set header color to light blue
+        self.eliminated_table.horizontalHeader().setStyleSheet("QHeaderView::section { background-color: rgb(104, 205, 254); }")
 
         self.main_layout.addLayout(right_side_layout, stretch=2)
 
@@ -237,32 +270,38 @@ class Application(QWidget):
 
         # Generate Matches Button
         self.generate_matches_button = QPushButton("Generate Matches")
+        self.generate_matches_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
         self.generate_matches_button.clicked.connect(self.generate_gruppeplay_matches)
         buttons_layout.addWidget(self.generate_matches_button)
 
         # Submit results button
         self.submit_results_button = QPushButton("Submit Results")
+        self.submit_results_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
         self.submit_results_button.setEnabled(False)
         self.submit_results_button.clicked.connect(self.handle_match_results)
         buttons_layout.addWidget(self.submit_results_button)
 
         # Edit Losses Button
         edit_losses_button = QPushButton("Edit Losses")
+        edit_losses_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
         edit_losses_button.clicked.connect(self.edit_losses_for_players)
         buttons_layout.addWidget(edit_losses_button)
 
         # Eliminate Player Button
         eliminate_player_button = QPushButton("Eliminate Player")
+        eliminate_player_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
         eliminate_player_button.clicked.connect(self.eliminate_a_selected_player)
         buttons_layout.addWidget(eliminate_player_button)
 
         # Restart Tournament Button
         reset_tournament_button = QPushButton("Restart Tournament")
+        reset_tournament_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
         reset_tournament_button.clicked.connect(self.restart_tournament)
         buttons_layout.addWidget(reset_tournament_button)
 
         # End Tournament Button
         end_tournament_button = QPushButton("End Tournament")
+        end_tournament_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
         end_tournament_button.clicked.connect(self.reset_tournament)
         buttons_layout.addWidget(end_tournament_button)
 
@@ -281,6 +320,16 @@ class Application(QWidget):
         remaining_players_table.setColumnWidth(0, 200)  # Adjust column width for Remaining Players
         for row, player in enumerate(self.players):
             remaining_players_table.setItem(row, 0, QTableWidgetItem(player.name))
+
+        # Set alternating row colors
+        remaining_players_table.setAlternatingRowColors(True)
+        palette = remaining_players_table.palette()
+        palette.setColor(QPalette.ColorRole.AlternateBase, QColor(210, 210, 210))  # Light grey color
+        remaining_players_table.setPalette(palette)
+
+        # Set header color to light blue
+        remaining_players_table.horizontalHeader().setStyleSheet("QHeaderView::section { background-color: rgb(104, 205, 254); }")
+
         final_layout.addWidget(remaining_players_table)
 
         if len(self.players) < 8:
@@ -290,16 +339,28 @@ class Application(QWidget):
             last_eliminated_table.setColumnWidth(0, 220)  # Adjust column width for Last Eliminated Players
             for row, player in enumerate(self.last_eliminated_players):
                 last_eliminated_table.setItem(row, 0, QTableWidgetItem(player.name))
+            
+            # Set alternating row colors
+            last_eliminated_table.setAlternatingRowColors(True)
+            palette = last_eliminated_table.palette()
+            palette.setColor(QPalette.ColorRole.AlternateBase, QColor(210, 210, 210))  # Light grey color
+            last_eliminated_table.setPalette(palette)
+
+            # Set header color to light blue
+            last_eliminated_table.horizontalHeader().setStyleSheet("QHeaderView::section { background-color: rgb(104, 205, 254); }")
+            
             final_layout.addWidget(last_eliminated_table)
 
             # Add a button to start the extra game
             start_extra_game_button = QPushButton("Start Extra Game")
+            start_extra_game_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
             start_extra_game_button.clicked.connect(self.handle_missing_players)
             final_layout.addWidget(start_extra_game_button)
 
         if len(self.players) == 8:
             # Add a button to proceed to the final matches
             proceed_button = QPushButton("Proceed to Final Matches")
+            proceed_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
             proceed_button.clicked.connect(self.seed_last_8_players)
             final_layout.addWidget(proceed_button)
 
@@ -503,7 +564,7 @@ class Application(QWidget):
             layout.addWidget(checkbox)
 
         submit_button = QPushButton("Submit Selection")
-        # connect the button to the function that added the selected players back to the tournament
+        submit_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
         submit_button.clicked.connect(self.add_selected_players)
 
         layout.addWidget(submit_button)
@@ -529,6 +590,7 @@ class Application(QWidget):
         layout.setSpacing(0)
         layout.addWidget(QLabel("The final 8 players have been seeded."))
         seed_button = QPushButton("Proceed to Final Matches")
+        seed_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
         seed_button.clicked.connect(self.show_final_matches)
         layout.addWidget(seed_button)
         self.main_layout.addLayout(layout)
@@ -582,6 +644,16 @@ class Application(QWidget):
             self.final_match_table.setItem(0, 0, QTableWidgetItem(team_1.name))
             self.final_match_table.setItem(0, 1, QTableWidgetItem(team_2.name))
 
+        # Set alternating row colors
+        self.final_match_table.setAlternatingRowColors(True)
+        palette = self.final_match_table.palette()
+        palette.setColor(QPalette.ColorRole.AlternateBase, QColor(210, 210, 210))  # Light grey color
+        self.final_match_table.setPalette(palette)
+
+        # Set header color to light blue
+        self.final_match_table.horizontalHeader().setStyleSheet("QHeaderView::section { background-color: rgb(104, 205, 254); }")
+
+
         table_layout = QVBoxLayout()
         table_layout.setContentsMargins(0, 0, 0, 0)
         table_layout.setSpacing(0)
@@ -592,6 +664,7 @@ class Application(QWidget):
 
         # Buttons
         submit_results_button = QPushButton("Submit Final Results")
+        submit_results_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
         submit_results_button.clicked.connect(lambda: self.handle_final_results(match_stage))
         layout.addWidget(submit_results_button)
 
@@ -699,6 +772,7 @@ class Application(QWidget):
             return
 
         player_names = [player.name for player in self.players] + [player.name for player in self.eliminated_players]
+        player_names.sort()
 
         # Clear all player data
         self.players.clear()
@@ -765,19 +839,32 @@ class Application(QWidget):
             player_table.setItem(row, 2, QTableWidgetItem(str(player.stats.wins)))
             player_table.setItem(row, 3, QTableWidgetItem(str(player.stats.times_sat_out)))
         
+        # Set alternating row colors
+        player_table.setAlternatingRowColors(True)
+        palette = player_table.palette()
+        palette.setColor(QPalette.ColorRole.AlternateBase, QColor(210, 210, 210))  # Light grey color
+        player_table.setPalette(palette)
+
+        # Set header color to light blue
+        player_table.horizontalHeader().setStyleSheet("QHeaderView::section { background-color: rgb(104, 205, 254); }")
+
+
         layout.addWidget(player_table)
 
 
         # Got to many errors with the restart button so I commented it out (Players already in the table)
         restart_button = QPushButton("Restart Tournament")
+        restart_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
         restart_button.clicked.connect(self.restart_tournament)
         layout.addWidget(restart_button)
 
         reset_button = QPushButton("Go Back to Start Page")
+        reset_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
         reset_button.clicked.connect(self.reset_tournament)
         layout.addWidget(reset_button)
 
         exit_button = QPushButton("Exit")
+        exit_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
         exit_button.clicked.connect(self.exit_tournament)
         layout.addWidget(exit_button)
 
