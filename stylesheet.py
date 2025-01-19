@@ -1,6 +1,6 @@
 stylesheet = """
 QWidget {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
 }
 """

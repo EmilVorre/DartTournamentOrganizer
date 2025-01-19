@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (
     QPushButton, QDialogButtonBox, QLabel, QWidget, QDialog, QGridLayout, QLineEdit, QSpinBox, QFormLayout, QListWidget, QListWidgetItem, QMessageBox, QCheckBox
 )
 from PyQt6.QtGui import QPainter, QPixmap
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import (Qt, QTimer)
 import random
 from player import Player  # Import the Player class
 from stats import Stats  # Import the Match class
@@ -29,7 +29,7 @@ class PlayerItemWidget(QWidget):
     def remove_player(self):
         self.remove_callback(self.player_name)
 
-    # sort players alfabetically
+    # sorto players alfabetically
     def __lt__(self, other):
         return self.player_name < other.player_name
 
@@ -45,7 +45,7 @@ class StartPage(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # Form layout for player names and max losses
+        #  Form layout for player names and max losses
         form_layout = QFormLayout()
         self.player_name_input = QLineEdit()
         self.player_name_input.returnPressed.connect(self.add_player)  # Connect Enter key to add_player
@@ -60,7 +60,7 @@ class StartPage(QWidget):
         self.player_list = QListWidget()
         layout.addWidget(self.player_list)
 
-        # Button to add player name to the list
+        # Button to add player namem to the list
         add_player_button = QPushButton("Add Player")
         add_player_button.clicked.connect(self.add_player)
         layout.addWidget(add_player_button)
@@ -71,9 +71,9 @@ class StartPage(QWidget):
         layout.addWidget(start_button)
 
         # Button to add 35 players for testing
-        #test_button = QPushButton("Add 35 Players for Testing")
-        #test_button.clicked.connect(self.add_test_players)
-        #layout.addWidget(test_button)
+        test_button = QPushButton("Add 35 Players for Testing")
+        test_button.clicked.connect(self.add_test_players)
+        layout.addWidget(test_button)
 
         self.setLayout(layout)
 
@@ -83,7 +83,7 @@ class StartPage(QWidget):
 
     def add_player(self, player_name=None):
         if player_name is None:
-            player_name = self.player_name_input.text().strip()
+            player_namea = self.player_name_input.text().strip()
         if player_name:
             for i in range(self.player_list.count()):
                 item = self.player_list.item(i)
@@ -114,7 +114,7 @@ class StartPage(QWidget):
 
     def add_test_players(self):
         max_losses = self.max_losses.value()
-        players = [Player(f"Player{i + 1}", None) for i in range(35)]
+        players = [Player(f"Player{i + 1}", None) for i in range(47)]
         self.switch_to_matchmaking(players, max_losses)
 
     def switch_to_matchmaking(self, players, max_losses):
@@ -135,15 +135,43 @@ class Application(QWidget):
         self.last_eliminated_players = []
         self.match_results = {}
         self.final_match_results = {}
+        
+        # Initialize scrolling variables
+        self.scroll_timer = QTimer(self)
+        self.scroll_timer.timeout.connect(self.scroll_player_table)
+        self.scroll_position = 0
+        self.scroll_delay_counter = 0
+
         self.init_ui()
+        self.start_scrolling()
 
     def init_ui(self):
-        self.setWindowTitle("Matchmaking Frontend")
+        self.setWindowTitle("Dart Tournament")
         self.main_layout = QHBoxLayout()
         self.setLayout(self.main_layout)
         self.status_label = QLabel("Status: Waiting for matches to be generated.")
         self.main_layout.addWidget(self.status_label)
         self.update_ui()
+
+    def start_scrolling(self):
+        """Start the scrolling timer for the player table."""
+        self.scroll_timer.start(100)  # Decrease the interval (in ms) for smoother scrolling
+
+    def scroll_player_table(self):
+        """Automatically scroll the player table with infinite looping."""
+        if hasattr(self, 'player_table'):  # Ensure the table exists
+            # Increment scroll position by a smaller step for smoother scrolling
+            self.scroll_position += 0.1  # Use a fractional step for smoother scrolling
+
+            # Check if we've reached the end
+            if self.scroll_position > self.player_table.verticalScrollBar().maximum():
+                self.scroll_delay_counter += 1
+                if self.scroll_delay_counter > 50:  # Adjust this value for the delay
+                    self.scroll_position = 0  # Reset to the top for infinite scrolling
+                    self.scroll_delay_counter = 0
+
+            # Set the new scroll position
+            self.player_table.verticalScrollBar().setValue(int(self.scroll_position))
 
     def clear_layout(self, layout):
         if layout is not None:

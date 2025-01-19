@@ -92,3 +92,4 @@ db.sqlite3
 # Environment variable files
 .env
 .env.*
+myenv/
