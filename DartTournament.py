@@ -441,7 +441,7 @@ class Application(QWidget):
         self.unused_table.setRowCount(len(self.unused_players))
         for row, player in enumerate(self.unused_players):
             self.unused_table.setItem(row, 0, QTableWidgetItem(player.name))
-        
+
 
     # old match generation function (was not fully random)    
     def generate_random_matches(self):
@@ -565,11 +565,19 @@ class Application(QWidget):
 
         submit_button = QPushButton("Submit Selection")
         submit_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
-        submit_button.clicked.connect(self.add_selected_players)
-
+        submit_button.clicked.connect(self.check_selection_and_add_players)
         layout.addWidget(submit_button)
 
         self.main_layout.addLayout(layout)
+
+    def check_selection_and_add_players(self):
+        selected_players = [player for checkbox, player in self.checkboxes if checkbox.isChecked()]
+        required_selection_count = (8 - len(self.players))
+
+        if len(selected_players) != required_selection_count:
+            QMessageBox.warning(self, "Selection Error", f"Please select exactly {required_selection_count} players.")
+        else:
+            self.add_selected_players()
 
     def add_selected_players(self):
         """Add the selected players back to the tournament."""
@@ -643,6 +651,12 @@ class Application(QWidget):
             team_2 = self.players[1]
             self.final_match_table.setItem(0, 0, QTableWidgetItem(team_1.name))
             self.final_match_table.setItem(0, 1, QTableWidgetItem(team_2.name))
+
+        for row in range(self.final_match_table.rowCount()):
+            for column in range(self.final_match_table.columnCount()):
+                item = self.final_match_table.item(row, column)
+                if item is not None:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Set alternating row colors
         self.final_match_table.setAlternatingRowColors(True)
