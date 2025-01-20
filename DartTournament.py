@@ -75,10 +75,10 @@ class StartPage(QWidget):
         layout.addWidget(start_button)
 
         # Button to add 17 players for testing
-        test_button = QPushButton("Add 17 Players for Testing")
-        test_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
-        test_button.clicked.connect(self.add_test_players)
-        layout.addWidget(test_button)
+        #test_button = QPushButton("Add 17 Players for Testing")
+        #test_button.setStyleSheet("background-color: rgb(104, 205, 254); color: black;")
+        #test_button.clicked.connect(self.add_test_players)
+        #layout.addWidget(test_button)
 
         self.setLayout(layout)
 
