@@ -10,6 +10,7 @@ __pycache__/
 .Python
 build/
 dist/
+dist/DartTournament.exe
 develop-eggs/
 downloads/
 eggs/
@@ -92,3 +93,4 @@ db.sqlite3
 # Environment variable files
 .env
 .env.*
+
