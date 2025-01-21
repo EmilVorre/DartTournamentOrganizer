@@ -405,11 +405,11 @@ class Application(QWidget):
         self.unused_players = available_players[-excess_people:] if excess_people > 0 else []
         available_players = available_players[:-excess_people] if excess_people > 0 else available_players
 
-        # randomize seeds for the players and sort them
+        # randomize seeds for the players and sort them(this are done in  a new way that does not use the seeding system implimented in the player class, but that seed are still randomized) 
         for player in available_players:
             player.random_seed()
 
-        available_players.sort(key=lambda player: player.seed)
+        random.shuffle(available_players)
 
         # split the players into teams of 4
         for i in range(0, len(available_players), 4):
