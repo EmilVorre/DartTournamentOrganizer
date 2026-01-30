@@ -54,6 +54,8 @@ coverage.xml
 # before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+# Exception: We need DartTournament.spec for automated builds
+!DartTournament.spec
 
 # Installer logs
 pip-log.txt
