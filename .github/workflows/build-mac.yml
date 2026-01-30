@@ -1,0 +1,40 @@
+name: Build Mac Application
+
+on:
+  workflow_dispatch:  # Allows manual triggering
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: macos-latest  # Uses GitHub's free macOS runner
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Build application
+      run: |
+        chmod +x build_mac.sh
+        ./build_mac.sh
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: DartTournament-Mac
+        path: dist/DartTournament.app
+        retention-days: 30
