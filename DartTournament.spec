@@ -59,14 +59,25 @@ coll = COLLECT(
 # Only create .app bundle on macOS
 import sys
 if sys.platform == 'darwin':
-    app = BUNDLE(
-        coll,
-        name='DartTournament.app',
-        icon='Icons/icon.ico',  # Note: Mac prefers .icns format, but .ico might work
-        bundle_identifier='com.darttournament.app',
-        version='1.0.0',
-        info_plist={
+    # Determine icon - prefer .icns, fallback to .ico, or None
+    icon_path = None
+    if os.path.exists('Icons/icon.icns'):
+        icon_path = 'Icons/icon.icns'
+    elif os.path.exists('Icons/icon.ico'):
+        icon_path = 'Icons/icon.ico'
+    
+    bundle_kwargs = {
+        'name': 'DartTournament.app',
+        'bundle_identifier': 'com.darttournament.app',
+        'version': '1.0.0',
+        'info_plist': {
             'NSPrincipalClass': 'NSApplication',
             'NSHighResolutionCapable': 'True',
         },
-    )
+    }
+    
+    # Only add icon if it exists
+    if icon_path:
+        bundle_kwargs['icon'] = icon_path
+    
+    app = BUNDLE(coll, **bundle_kwargs)

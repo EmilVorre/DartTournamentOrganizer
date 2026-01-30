@@ -40,7 +40,30 @@ rm -rf build dist __pycache__
 
 # Build the application
 echo "Building application..."
-pyinstaller DartTournament.spec
+if [ -f "DartTournament.spec" ]; then
+    echo "Using DartTournament.spec file..."
+    pyinstaller DartTournament.spec
+    BUILD_EXIT_CODE=$?
+else
+    echo "⚠ Spec file not found. Building directly from Python file..."
+    echo "   (This will create a basic build. For best results, commit DartTournament.spec to git)"
+    pyinstaller --name=DartTournament \
+        --windowed \
+        --onedir \
+        --add-data "dartboard.png:." \
+        --icon=Icons/icon.ico \
+        --osx-bundle-identifier=com.darttournament.app \
+        DartTournament.py
+    BUILD_EXIT_CODE=$?
+fi
+
+# Check if pyinstaller failed
+if [ $BUILD_EXIT_CODE -ne 0 ]; then
+    echo ""
+    echo "✗ Build failed with exit code $BUILD_EXIT_CODE"
+    echo "  Check the output above for errors."
+    exit 1
+fi
 
 # Check if build was successful
 if [ -d "dist/DartTournament.app" ]; then
